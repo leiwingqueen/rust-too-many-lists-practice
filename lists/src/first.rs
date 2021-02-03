@@ -52,38 +52,39 @@ impl List {
     }
 }
 
-//*******************************drop的显示实现*****************
+//*******************************drop的显式实现*****************
 
-impl Drop for List {
+/*impl Drop for List {
     fn drop(&mut self) {
-        // 注意：在实际Rust代码中你不能显式调用`drop`，
-        // 我们假装自己是编译器！
-        list.head.drop(); // 尾递归——好！
+        // NOTE: you can't actually explicitly call `drop` in real Rust code;
+        // we're pretending to be the compiler!
+        self.head.drop(); // tail recursive - good!
     }
 }
 
 impl Drop for Link {
     fn drop(&mut self) {
-        /*match list.head {
-            Link::Empty => {} // 完成！
-            Link::More(ref mut boxed_node) => {
-                boxed_node.drop(); // 尾递归——好！
-            }
-        }*/
+        /* match *self {
+             Link::Empty => {} // Done!
+             Link::More(ref mut boxed_node) => {
+                 boxed_node.drop(); // tail recursive - good!
+             }
+         }*/
+
         let mut cur_link = mem::replace(&mut self.head, Link::Empty);
-        // `while let` == “在这个模式不匹配之前持续循环”
+        // `while let` == "do this thing until this pattern doesn't match"
         while let Link::More(mut boxed_node) = cur_link {
             cur_link = mem::replace(&mut boxed_node.next, Link::Empty);
-            // boxed_node在这里退出作用域然后被丢弃；
-            // 但是其节点的`next`字段被设置为 Link::Empty
-            // 所以没有多层递归产生。
+            // boxed_node goes out of scope and gets dropped here;
+            // but its Node's `next` field has been set to Link::Empty
+            // so no unbounded recursion occurs.
         }
     }
 }
 
 impl Drop for Box<Node> {
     fn drop(&mut self) {
-        self.ptr.drop(); // 糟糕，不是尾递归！
+        self.ptr.drop(); // uh oh, not tail recursive!
         deallocate(self.ptr);
     }
 }
@@ -92,7 +93,7 @@ impl Drop for Node {
     fn drop(&mut self) {
         self.next.drop();
     }
-}
+}*/
 
 #[cfg(test)]
 mod test {
